@@ -9,23 +9,26 @@ import com.net.blog.exception.ResourceNotFoundException;
 import com.net.blog.repository.CommentRepository;
 import com.net.blog.repository.PostRepository;
 import com.net.blog.service.CommentService;
+import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static com.net.blog.mapper.CommentMapper.mapToDto;
-import static com.net.blog.mapper.CommentMapper.mapToEntity;
+
 
 @Service
 public class CommentServiceImpl implements CommentService {
 
     private CommentRepository commentRepository;
     private PostRepository postRepository;
-    public CommentServiceImpl(CommentRepository commentRepository,PostRepository postRepository) {
+
+    private ModelMapper modelMapper;
+    public CommentServiceImpl(CommentRepository commentRepository,PostRepository postRepository,ModelMapper modelMapper) {
         this.commentRepository = commentRepository;
         this.postRepository=postRepository;
+        this.modelMapper=modelMapper;
     }
 
     @Override
@@ -88,4 +91,16 @@ public class CommentServiceImpl implements CommentService {
         }
         return comment;
     }
+
+    private CommentDto mapToDto(Comment comment)
+    {
+        CommentDto commentDto=modelMapper.map(comment,CommentDto.class);
+        return commentDto;
+    }
+    private Comment mapToEntity(CommentDto commentDto)
+    {
+        Comment comment=modelMapper.map(commentDto,Comment.class);
+        return comment;
+    }
+
 }
