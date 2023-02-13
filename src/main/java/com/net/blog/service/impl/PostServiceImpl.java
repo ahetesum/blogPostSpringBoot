@@ -16,6 +16,9 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static com.net.blog.mapper.PostMapper.mapToDto;
+import static com.net.blog.mapper.PostMapper.postMapEntity;
+
 @Service
 public class PostServiceImpl implements PostService {
     private PostRepository postRepository;
@@ -27,9 +30,9 @@ public class PostServiceImpl implements PostService {
     @Override
     public PostDto createPost(PostDto postDto) {
 
-        Post post = PostMapper.postMapEntity(postDto);
+        Post post = postMapEntity(postDto);
         Post savedPost=postRepository.save(post);
-        PostDto responsePost= PostMapper.mapToDto(savedPost);
+        PostDto responsePost= mapToDto(savedPost);
 
         return responsePost;
     }
@@ -42,7 +45,7 @@ public class PostServiceImpl implements PostService {
         Page<Post> pageblePosts=postRepository.findAll(pageable);
         List<Post> posts= pageblePosts.getContent();
         PostResponse postResponse = new PostResponse();
-        postResponse.setContent(posts.stream().map(p->PostMapper.mapToDto(p)).collect(Collectors.toList()));
+        postResponse.setContent(posts.stream().map(p->mapToDto(p)).collect(Collectors.toList()));
         postResponse.setPageNo(pageblePosts.getNumber());
         postResponse.setPageSize(pageblePosts.getSize());
         postResponse.setTotalElement(pageblePosts.getTotalElements());
@@ -54,7 +57,7 @@ public class PostServiceImpl implements PostService {
     @Override
     public PostDto getById(long id) {
         Post post=postRepository.findById(id).orElseThrow(()-> new ResourceNotFoundException("Post","id",id));
-        return PostMapper.mapToDto(post);
+        return mapToDto(post);
     }
 
     @Override
@@ -66,7 +69,7 @@ public class PostServiceImpl implements PostService {
         post.setTitle(postDto.getTitle());
         Post updatedPost=  postRepository.save(post);
 
-        return PostMapper.mapToDto(updatedPost);
+        return mapToDto(updatedPost);
     }
 
     @Override
