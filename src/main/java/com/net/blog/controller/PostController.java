@@ -50,6 +50,11 @@ public class PostController {
         return  new ResponseEntity<>(postService.update(id,postDto),HttpStatus.OK);
     }
 
+    @GetMapping("/category/{categoryId}")
+    public ResponseEntity<List<PostDto>> getByCategory(@PathVariable("categoryId") long categoryId){
+        return  new ResponseEntity<>(postService.getPostByCategory(categoryId),HttpStatus.OK);
+    }
+
     @DeleteMapping("delete/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<String> delete(@PathVariable("id") long id){

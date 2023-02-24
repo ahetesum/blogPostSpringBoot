@@ -2,8 +2,10 @@ package com.net.blog.service.impl;
 
 import com.net.blog.dto.PostDto;
 import com.net.blog.dto.PostResponse;
+import com.net.blog.entity.Category;
 import com.net.blog.entity.Post;
 import com.net.blog.exception.ResourceNotFoundException;
+import com.net.blog.repository.CategoryRepository;
 import com.net.blog.repository.PostRepository;
 import com.net.blog.service.PostService;
 import org.modelmapper.ModelMapper;
@@ -23,16 +25,22 @@ public class PostServiceImpl implements PostService {
     private PostRepository postRepository;
     private ModelMapper modelMapper;
 
-    public PostServiceImpl(PostRepository postRepository, ModelMapper modelMapper) {
+    private CategoryRepository categoryRepository;
+    public PostServiceImpl(PostRepository postRepository, CategoryRepository categoryRepository,ModelMapper modelMapper) {
         this.postRepository = postRepository;
+        this.categoryRepository=categoryRepository;
         this.modelMapper=modelMapper;
     }
 
     @Override
     public PostDto createPost(PostDto postDto) {
 
+        Category category = categoryRepository.findById(postDto.getCategoryId())
+                .orElseThrow(()->new ResourceNotFoundException("Category","id", postDto.getCategoryId()));
+
         Post post = mapToEntity(postDto);
         Post savedPost=postRepository.save(post);
+        post.setCategory(category);
         PostDto responsePost= mapToDto(savedPost);
 
         return responsePost;
@@ -65,12 +73,27 @@ public class PostServiceImpl implements PostService {
     public PostDto update(long id, PostDto postDto) {
         Post post=postRepository.findById(id).orElseThrow(()-> new ResourceNotFoundException("Post","id",id));
 
+        Category category = categoryRepository.findById(postDto.getCategoryId())
+                .orElseThrow(()->new ResourceNotFoundException("Category","id", postDto.getCategoryId()));
+
         post.setContent(postDto.getContent());
         post.setDescription(postDto.getDescription());
         post.setTitle(postDto.getTitle());
+        post.setCategory(category);
         Post updatedPost=  postRepository.save(post);
 
         return mapToDto(updatedPost);
+    }
+
+    @Override
+    public List<PostDto> getPostByCategory(long categoryId) {
+
+        Category category = categoryRepository.findById(categoryId)
+                .orElseThrow(()->new ResourceNotFoundException("Category","id",categoryId));
+
+        List<Post> posts= postRepository.findByCategoryId(categoryId);
+
+        return posts.stream().map(post -> modelMapper.map(post,PostDto.class)).collect(Collectors.toList());
     }
 
     @Override
